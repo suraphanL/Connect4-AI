@@ -68,12 +68,15 @@ def feature2_row(state,chip):#Find 3 connected
     show_state(state)
     target = 3
     count = 0
-    j = 1
+    j = 0
     startIndex = -1
 
     is_left_adjacent = False
     is_right_adjacent = False
+    is_one_adjacent_always = False
     score = 900000
+    space_between_index = -1
+
     # for j in range(6): #Row
     for i in range(7): #Column
         print(state[i][j] , ' chip: ', chip)
@@ -81,9 +84,15 @@ def feature2_row(state,chip):#Find 3 connected
             count += 1
             if startIndex == -1:
                 startIndex = i
+        elif count > 0 and count < target and state[i][j] == 'o' and ((j-1 >= 0 and state[i][j-1] != 'o') or (j == 0)) and space_between_index == -1:
+            space_between_index = i
         elif count < target and state[i][j] != 'o':
             count = 0
             startIndex = -1
+        else:
+            count = 0
+            startIndex = -1
+            space_between_index = -1
 
         #Add special case
         if count == target:
@@ -91,33 +100,37 @@ def feature2_row(state,chip):#Find 3 connected
             break
 
     if count == target:
-        print('Checking left adjacent')
         left_adjacent = startIndex - 1
         right_adjacent = startIndex + target
-        if left_adjacent >= 0 and state[left_adjacent][j] == 'o':
-            print('check left adjacent')
-            if j > 0:
-                print('Need to check below row')
-                if state[left_adjacent][j-1] != 'o':
+        if space_between_index != -1:
+            print('One always adjacent', space_between_index)
+            is_one_adjacent_always = True
+        else:
+            print('Checking left adjacent')
+            if left_adjacent >= 0 and state[left_adjacent][j] == 'o':
+                print('check left adjacent')
+                if j > 0:
+                    print('Need to check below row')
+                    if state[left_adjacent][j-1] != 'o':
+                        print('immediately adjacent left square')
+                        is_left_adjacent = True
+                else:
                     print('immediately adjacent left square')
                     is_left_adjacent = True
-            else:
-                print('immediately adjacent left square')
-                is_left_adjacent = True
 
-        if right_adjacent < 7 and state[right_adjacent][j] == 'o':
-            print('check right adjacent')
-            if j > 0:
-                print('Need to check below row')
-                if state[right_adjacent][j-1] != 'o':
+            if right_adjacent < 7 and state[right_adjacent][j] == 'o':
+                print('check right adjacent')
+                if j > 0:
+                    print('Need to check below row')
+                    if state[right_adjacent][j-1] != 'o':
+                        print('immediately adjacent right square')
+                        is_right_adjacent = True
+                else:
                     print('immediately adjacent right square')
                     is_right_adjacent = True
-            else:
-                print('immediately adjacent right square')
-                is_right_adjacent = True
-    print('is_left_adjacent: ', is_left_adjacent, ' is_right_adjacent: ', is_right_adjacent)
+    print('is_left_adjacent: ', is_left_adjacent, ' is_right_adjacent: ', is_right_adjacent, ' is_one_adjacent_always: ', is_one_adjacent_always)
 
-    return is_left_adjacent * score + is_right_adjacent * score
+    return is_left_adjacent * score + is_right_adjacent * score + is_one_adjacent_always * score
 
 
 
@@ -182,7 +195,10 @@ def show_state(state):
 # state=[['B'], ['W','B'], ['W', 'W','B'], ['B', 'W','B','B'], ['W','W'], ['B','B','W','W'], []] #No feature2 row 1
 # state=[['B'], ['W'], ['W', 'W','B'], ['B', 'W','B','B'], ['W','W'], ['B','B','W','W'], []] #Only left
 # state=state=[['B'], ['W','B'], ['W', 'W','B'], ['B', 'W','B','B'], ['W','W'], ['B'], []] #Only right
-state=[['B'], ['W'], ['W', 'W','B'], ['B', 'W','B','B'], ['W','W'], ['B'], []] #Both
+# state=[['B'], ['W'], ['W', 'W','B'], ['B', 'W','B','B'], ['W','W'], ['B'], []] #Both
+
+state=[['B'], ['W','B'], ['W', 'W','B'], [], ['W','W'], ['B','B','W','W'], []] #One always
+# state=[['B'], ['B','W','B'], ['B','W', 'W','B'], ['B'], ['B','W','W'], ['B','B','B','W','W'], ['B']] #One always
 print('score:', feature2_row(state=state, chip='W'))   
 
 
