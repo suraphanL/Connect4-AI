@@ -170,7 +170,51 @@ def feature2_column(state,chip):#Find 3 connected
 
     return is_top_adjacent * score
 
-
+def feature2_diagonally(state,chip):#Find 3 connected
+    state = [s+['o']*(7-len(s)) for s in state]
+    show_state(state)
+    target = 3
+    # count = 0
+    # i = 1
+    
+    is_top_adjacent = False
+    score = 900000
+    for i in range(6): #Row
+        for j in range(6): #Column
+            if i <= 3 and j >= 3:
+                count = 0
+                startIndex = -1
+                for k in reversed(range(4)):
+                    if state[i+k][j-k] == chip:
+                        count += 1
+                    elif state[i+k][j-k] != 'o':
+                        count = 0
+                        break
+                    
+                    if count == target:
+                        print('Found target ', chip, ' count ', count)
+                        print('Checking top adjacent')
+                        top_adjacent = startIndex + target
+        
+                        if top_adjacent < 6 and state[i][top_adjacent] == 'o':
+                            print('immediately adjacent top square')
+                            is_top_adjacent = True
+                
+        
+    
+    # if i <= 3 and j <= 2:p
+    #     count = 0
+    #     for k in range(4):
+    #         if state[i+k][j+k] == chip:
+    #             count += 1
+    #         elif state[i+k][j+k] != 'o':
+    #             count = 0
+    #             break
+    #     if count == 4:
+    #         return (i,j,4)
+    # if count > max_count:
+    #     max_count = count
+        
 def show_state(state):
     print()
     state = [s+['o']*(7-len(s)) for s in state]
@@ -192,14 +236,14 @@ def show_state(state):
 # state = ([],[],[],[],[],[],[])
 # state=[['B', 'B', 'B','W'], [], ['W', 'W','B'], ['B', 'W','B'], ['W','W'], ['W'], []]
 
-# state=[['B'], ['W','B'], ['W', 'W','B'], ['B', 'W','B','B'], ['W','W'], ['B','B','W','W'], []] #No feature2 row 1
+state=[['B'], ['W','B'], ['W', 'W','B'], ['B', 'W','B','B'], ['W','W'], ['B','B','W','W'], []] #No feature2 row 1
 # state=[['B'], ['W'], ['W', 'W','B'], ['B', 'W','B','B'], ['W','W'], ['B','B','W','W'], []] #Only left
 # state=state=[['B'], ['W','B'], ['W', 'W','B'], ['B', 'W','B','B'], ['W','W'], ['B'], []] #Only right
 # state=[['B'], ['W'], ['W', 'W','B'], ['B', 'W','B','B'], ['W','W'], ['B'], []] #Both
 
-state=[['B'], ['W','B'], ['W', 'W','B'], [], ['W','W'], ['B','B','W','W'], []] #One always
+# state=[['B'], ['W','B'], ['W', 'W','B'], [], ['W','W'], ['B','B','W','W'], []] #One always
 # state=[['B'], ['B','W','B'], ['B','W', 'W','B'], ['B'], ['B','W','W'], ['B','B','B','W','W'], ['B']] #One always
-print('score:', feature2_row(state=state, chip='W'))   
+# print('score:', feature2_row(state=state, chip='W'))   
 
 
 # state=[['B'], ['W','B','W','W', 'W'], ['W', 'W','B'], ['B', 'W','B','B'], ['W','W'], ['B','B','W','W'], []] #Column
