@@ -180,40 +180,68 @@ def feature2_diagonally(state,chip):#Find 3 connected
     score = 900000
     for i in range(6): #Row
         for j in range(6): #Column
-            # if i <= 3 and j >= 3:
-            #     count = 0
-            #     startIndex = -1
-            #     for k in reversed(range(4)):
-            #         if state[i+k][j-k] == chip:
-            #             count += 1
-            #         elif state[i+k][j-k] != 'o':
-            #             count = 0
-            #             break
+            count = 0
+            is_top_adjacent = False
+            is_bottom_adjacent = False
+            is_one_adjacent_always = False
+            empty_index = None
+            startIndex = -1
+            if i <= 3 and j >= 3:
+                
+                for k in reversed(range(4)):
+                    if state[i+k][j-k] == chip:
+                        count += 1
+                        if startIndex == -1:
+                            startIndex = k
+                    elif count > 0 and not is_one_adjacent_always and state[i+k][j-k] != 'o':
+                        is_one_adjacent_always = True
+                        empty_index = (i+k, j-k)
+                    else:
+                        count = 0
+                        startIndex = -1    
+                        is_one_adjacent_always = False
+                        empty_index = None    
                     
-            #         if count == target:
-            #             print('Found target ', chip, ' count ', count)
-            #             print('Checking top adjacent')
-            #             top_adjacent = startIndex + target
-        
-            #             if top_adjacent < 6 and state[i][top_adjacent] == 'o':
-            #                 print('immediately adjacent top square')
-            #                 is_top_adjacent = True
+                    if count == target:
+                        print('Found target ', chip, ' count ', count)
+                        if is_one_adjacent_always and state[empty_index[0]][empty_index[1] -1 ] != 'o' :
+                            print(empty_index)
+                            return is_one_adjacent_always * score
+                        else:
+                            top_diagonal_adjacent_row = j - startIndex + target
+                            top_diagonal_adjacent_column = i + startIndex - target
+                            print('Top: ',state[top_diagonal_adjacent_column][top_diagonal_adjacent_row])
+                            if top_diagonal_adjacent_row < 6 and top_diagonal_adjacent_column < 7 and state[top_diagonal_adjacent_column][top_diagonal_adjacent_row] == 'o' and state[top_diagonal_adjacent_column][top_diagonal_adjacent_row-1] != 'o':
+                                print('immediately adjacent top square')
+                                is_top_adjacent = True
+
+                            bottom_diagonal_adjacent_row = j - startIndex - 1
+                            bottom_diagonal_adjacent_column = i + startIndex + 1
+                            print('Top: ',state[bottom_diagonal_adjacent_column][bottom_diagonal_adjacent_row])
+                            if bottom_diagonal_adjacent_row >= 0 and bottom_diagonal_adjacent_column >=0 and state[bottom_diagonal_adjacent_column][bottom_diagonal_adjacent_row] == 'o':
+                                if bottom_diagonal_adjacent_row == 0 or (bottom_diagonal_adjacent_row - 1 > 0 and state[bottom_diagonal_adjacent_column][bottom_diagonal_adjacent_row -1] != 'o'):    
+                                    print('immediately adjacent top square')
+                                    is_bottom_adjacent = True
+
+                            return is_top_adjacent * score + is_bottom_adjacent * score
+
+
             
             if i <= 3 and j <= 2:
-                count = 0
-                is_top_adjacent = False
-                is_bottom_adjacent = False
-                is_one_adjacent_always = False
-                empty_index = None
                 for k in range(4):
                     print(state[i+k][j+k] , ' chip: ', chip)
                     if state[i+k][j+k] == chip:
                         count += 1
+                        if startIndex == -1:
+                            startIndex = k
                     elif count > 0 and not is_one_adjacent_always and state[i+k][j+k] == 'o':
                         is_one_adjacent_always = True
                         empty_index = (i+k, j+k)
                     else: #Should start with chip
-                        break    
+                        count = 0
+                        startIndex = -1    
+                        is_one_adjacent_always = False
+                        empty_index = None
 
                     if count == target:
                         print('Found target ', chip, ' count ', count)
@@ -221,15 +249,15 @@ def feature2_diagonally(state,chip):#Find 3 connected
                             print(empty_index)
                             return is_one_adjacent_always * score
                         else:
-                            top_diagonal_adjacent_row = j + target
-                            top_diagonal_adjacent_column = i + target
+                            top_diagonal_adjacent_row = j + startIndex + target
+                            top_diagonal_adjacent_column = i + startIndex + target
                             print('Top: ',state[top_diagonal_adjacent_column][top_diagonal_adjacent_row])
                             if top_diagonal_adjacent_row < 6 and top_diagonal_adjacent_column < 7 and state[top_diagonal_adjacent_column][top_diagonal_adjacent_row] == 'o' and state[top_diagonal_adjacent_column][top_diagonal_adjacent_row-1] != 'o':
                                 print('immediately adjacent top square')
                                 is_top_adjacent = True
 
-                            bottom_diagonal_adjacent_row = j  - 1
-                            bottom_diagonal_adjacent_column = i - 1
+                            bottom_diagonal_adjacent_row = j + startIndex  - 1
+                            bottom_diagonal_adjacent_column = i + startIndex - 1
                             print('Top: ',state[bottom_diagonal_adjacent_column][bottom_diagonal_adjacent_row])
                             if bottom_diagonal_adjacent_row >= 0 and bottom_diagonal_adjacent_column >=0 and state[bottom_diagonal_adjacent_column][bottom_diagonal_adjacent_row] == 'o':
                                 if bottom_diagonal_adjacent_row == 0 or (bottom_diagonal_adjacent_row - 1 > 0 and state[bottom_diagonal_adjacent_column][bottom_diagonal_adjacent_row -1] != 'o'):    
@@ -290,5 +318,8 @@ def show_state(state):
 # print('score:', feature2_column(state=state, chip='W'))
 
 # state=[['B'], ['W','B'], ['W', 'W','B'], [], ['W','W'], ['B','B','W','W'], []]
-state=[['W'], ['W','B'], ['W', 'W','B'], ['B', 'W','B','B'], ['W','W','W','W'], ['B','B','W','W'], []]
+# state=[['W'], ['W','B'], ['W', 'W','B'], ['B', 'W','B','B'], ['W','W','W','W'], ['B','B','W','W'], []]
+# state=[['W','W','W','B'], ['W','W','B'], ['W','B'], [], ['W','W','W','W'], ['B','B','W','W'], []] #dia first, Case start empty
+state=[['W','W','W'], ['W','W','B'], ['W','B'], ['B'], ['W','W','W','W'], ['B','B','W','W'], []] #dia first, Case start 
+# state=[['W','W',], ['W','W','W','B'], ['W', 'W','W', 'W','B'], ['W','W', 'W','W', 'W','B'], ['W','W'], ['B','B','W','W'], []] #dia second, Case start empty
 print('score:', feature2_diagonally(state=state, chip='B'))
