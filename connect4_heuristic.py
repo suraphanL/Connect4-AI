@@ -62,7 +62,6 @@ def check_window(state,chip,i,j):
 
 
 
-
 def feature2_row(state,chip):#Find 3 connected
     state = [s+['o']*(7-len(s)) for s in state]
     show_state(state)
@@ -133,42 +132,39 @@ def feature2_row(state,chip):#Find 3 connected
     return 0
 
 
-
-
 def feature2_column(state,chip):#Find 3 connected
     state = [s+['o']*(7-len(s)) for s in state]
     show_state(state)
     target = 3
-    count = 0
-    i = 1
-    startIndex = -1
-    is_top_adjacent = False
     score = 900000
-    # for j in range(6): #Row
-    for j in range(6): #Column
-        print(state[i][j] , ' chip: ', chip)
-        if state[i][j] == chip:
-            count += 1
-            if startIndex == -1:
-                startIndex = j
-        elif count < target and state[i][j] != 'o':
-            count = 0
-            startIndex = -1
+    for i in range(6): #Row
+        count = 0
+        startIndex = -1
+        is_top_adjacent = False
+        for j in range(6): #Column
+            print(state[i][j] , ' chip: ', chip)
+            if state[i][j] == chip:
+                count += 1
+                if startIndex == -1:
+                    startIndex = j
+            elif count < target and state[i][j] != 'o':
+                count = 0
+                startIndex = -1
+
+            if count == target:
+                print('Found target ', chip, ' count ', count)
+                break
 
         if count == target:
-            print('Found target ', chip, ' count ', count)
-            break
-
-    if count == target:
-        print('Checking top adjacent')
-        top_adjacent = startIndex + target
-        
-        if top_adjacent < 6 and state[i][top_adjacent] == 'o':
-            print('immediately adjacent top square')
-            is_top_adjacent = True
-    print('is_top_adjacent: ', is_top_adjacent)
-
-    return is_top_adjacent * score
+            print('Checking top adjacent')
+            top_adjacent = startIndex + target
+            
+            if top_adjacent < 6 and state[i][top_adjacent] == 'o':
+                print('immediately adjacent top square')
+                is_top_adjacent = True
+            print('is_top_adjacent: ', is_top_adjacent)
+            return is_top_adjacent * score
+    return 0
 
 def feature2_diagonally(state,chip):#Find 3 connected
     state = [s+['o']*(7-len(s)) for s in state]
@@ -178,7 +174,7 @@ def feature2_diagonally(state,chip):#Find 3 connected
     # i = 1
     
     score = 900000
-    for i in range(6): #Row
+    for i in range(7): #Row
         for j in range(6): #Column
             count = 0
             is_top_adjacent = False
@@ -311,12 +307,12 @@ def show_state(state):
 
 # state=[['B'], ['W','B'], ['W', 'W','B'], [], ['W','W'], ['B','B','W','W'], []] #One always
 # state=[['B'], ['B','W','B'], ['B','W', 'W','B'], ['B'], ['B','W','W'], ['B','B','B','W','W'], ['B']] #One always
-state=[['W'], ['W'], ['W'], [], ['W', 'W'], ['W', 'W'], ['W', 'W']] #One always
-print('score:', feature2_row(state=state, chip='W'))   
+# state=[['W'], ['W'], ['W'], [], ['W', 'W'], ['W', 'W'], ['W', 'W']] #One always
+# print('score:', feature2_row(state=state, chip='W'))   
 
 
-# state=[['B'], ['W','B','W','W', 'W'], ['W', 'W','B'], ['B', 'W','B','B'], ['W','W'], ['B','B','W','W'], []] #Column
-# print('score:', feature2_column(state=state, chip='W'))
+state=[['B'], ['W','B','W','W', 'W'], ['W', 'W','B'], ['B', 'W','B','B'], ['W','W'], ['B','B','W','W'], []] #Column
+print('score:', feature2_column(state=state, chip='W'))
 
 # state=[['B'], ['W','B'], ['W', 'W','B'], ['B', 'W', 'B', 'B'], ['W','W'], ['B','B','W','W'], []]
 # state=[['W'], ['W','B'], ['W', 'W','B'], ['B', 'W','B','B'], ['W','W','W','W'], ['B','B','W','W'], []]
