@@ -131,7 +131,6 @@ def feature2_row(state,chip):#Find 3 connected
                 return is_left_adjacent * score + is_right_adjacent * score + is_one_adjacent_always * score 
     return 0
 
-
 def feature2_column(state,chip):#Find 3 connected
     state = [s+['o']*(7-len(s)) for s in state]
     show_state(state)
@@ -170,8 +169,6 @@ def feature2_diagonally(state,chip):#Find 3 connected
     state = [s+['o']*(7-len(s)) for s in state]
     show_state(state)
     target = 3
-    # count = 0
-    # i = 1
     
     score = 900000
     for i in range(7): #Row
@@ -183,13 +180,15 @@ def feature2_diagonally(state,chip):#Find 3 connected
             empty_index = None
             startIndex = -1
             if i <= 3 and j >= 3:
-                
+                print(i,j)
                 for k in reversed(range(4)):
+                    print(state[i+k][j-k] , ' chip: ', chip)
+                    print( (i+k), (j-k))
                     if state[i+k][j-k] == chip:
                         count += 1
                         if startIndex == -1:
                             startIndex = k
-                    elif count > 0 and not is_one_adjacent_always and state[i+k][j-k] != 'o':
+                    elif count > 0 and not is_one_adjacent_always and state[i+k][j-k] == 'o':
                         is_one_adjacent_always = True
                         empty_index = (i+k, j-k)
                     else:
@@ -200,9 +199,20 @@ def feature2_diagonally(state,chip):#Find 3 connected
                     
                     if count == target:
                         print('Found target ', chip, ' count ', count)
-                        if is_one_adjacent_always and state[empty_index[0]][empty_index[1] -1 ] != 'o' :
-                            print(empty_index)
-                            return is_one_adjacent_always * score
+
+                        if is_one_adjacent_always:
+                            if state[empty_index[0]][empty_index[1] -1 ] != 'o':
+                                return is_one_adjacent_always * score
+                            else:
+                                count_token = 0
+                                for token in state[empty_index[0]]:
+                                    if token != 'o':
+                                        count_token+=1
+                                    else:
+                                        break
+                                if count_token == empty_index[1] -1:
+                                    print(empty_index)
+                                    return is_one_adjacent_always * score
                         else:
                             top_diagonal_adjacent_row = j - startIndex + target
                             top_diagonal_adjacent_column = i + startIndex - target
@@ -241,9 +251,19 @@ def feature2_diagonally(state,chip):#Find 3 connected
 
                     if count == target:
                         print('Found target ', chip, ' count ', count)
-                        if is_one_adjacent_always and state[empty_index[0]][empty_index[1] -1 ] != 'o' :
-                            print(empty_index)
-                            return is_one_adjacent_always * score
+                        if is_one_adjacent_always:
+                            if state[empty_index[0]][empty_index[1] -1 ] != 'o':
+                                return is_one_adjacent_always * score
+                            else:
+                                count_token = 0
+                                for token in state[empty_index[0]]:
+                                    if token != 'o':
+                                        count_token+=1
+                                    else:
+                                        break
+                                if count_token == empty_index[1] -1:
+                                    print(empty_index)
+                                    return is_one_adjacent_always * score
                         else:
                             top_diagonal_adjacent_row = j + startIndex + target
                             top_diagonal_adjacent_column = i + startIndex + target
@@ -261,7 +281,7 @@ def feature2_diagonally(state,chip):#Find 3 connected
                                     is_bottom_adjacent = True
 
                             return is_top_adjacent * score + is_bottom_adjacent * score
-
+    return 0
 
                         
                                
@@ -311,12 +331,15 @@ def show_state(state):
 # print('score:', feature2_row(state=state, chip='W'))   
 
 
-state=[['B'], ['W','B','W','W', 'W'], ['W', 'W','B'], ['B', 'W','B','B'], ['W','W'], ['B','B','W','W'], []] #Column
-print('score:', feature2_column(state=state, chip='W'))
+# state=[['B'], ['W','B','W','W', 'W'], ['W', 'W','B'], ['B', 'W','B','B'], ['W','W'], ['B','B','W','W'], []] #Column
+# print('score:', feature2_column(state=state, chip='W'))
 
 # state=[['B'], ['W','B'], ['W', 'W','B'], ['B', 'W', 'B', 'B'], ['W','W'], ['B','B','W','W'], []]
 # state=[['W'], ['W','B'], ['W', 'W','B'], ['B', 'W','B','B'], ['W','W','W','W'], ['B','B','W','W'], []]
 # state=[['W','W','W','B'], ['W','W','B'], ['W','B'], [], ['W','W','W','W'], ['B','B','W','W'], []] #dia first, Case start empty
 # state=[['W','W','W'], ['W','W','B'], ['W','B'], ['B'], ['W','W','W','W'], ['B','B','W','W'], []] #dia first, Case start 
 # state=[['W','W',], ['W','W','W','B'], ['W', 'W','W', 'W','B'], ['W','W', 'W','W', 'W','B'], ['W','W'], ['B','B','W','W'], []] #dia second, Case start empty
-# print('score:', feature2_diagonally(state=state, chip='W'))
+# state=[['B'], ['W'], ['B', 'W'], ['W', 'W'], ['B','B','W','W'], ['W'], []] #Special case feature 2, 1
+# state=[['B','B','W','W'], ['W'], ['B', 'W'], ['W'], [], ['W'], []] #Special case feature 2, 2
+state=[['B','B','W'], ['W','W','W'], ['B', 'W'], ['W'], [], ['W'], []] #Special case feature 2, 2 start empty
+print('score:', feature2_diagonally(state=state, chip='W'))
