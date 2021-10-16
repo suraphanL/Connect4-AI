@@ -299,6 +299,47 @@ def feature2_diagonally(state,chip):#Find 3 connected
     # if count > max_count:
     #     max_count = count
         
+def feature3_row(state,chip):#Find 3 connected
+    state = [s+['o']*(7-len(s)) for s in state]
+    show_state(state)
+    target = 2
+    total_score = 0
+    score = 900000
+    for j in range(6): #Row
+        target_count = 0
+        space_before_count = 0
+        space_after_count = 0
+        startIndex = -1
+        
+        for i in range(7): #Column
+            print(state[i][j] , ' chip: ', chip)
+            if state[i][j] == chip:
+                target_count += 1
+                if startIndex == -1:
+                    startIndex = i
+            elif state[i][j] != chip and state[i][j] != 'o': #Opponent
+                target_count = 0
+                space_before_count = 0
+                space_after_count = 0
+                startIndex = -1
+            elif state[i][j] == 'o':
+                if j == 0 or state[i][j-1] != 'o':
+                    space_before_count +=1
+
+                
+            if target_count == target:
+                print('Found target ', chip, ' count ', target_count)
+                for after in range(i+1,7):
+                    print('After: ', after)
+                    print(state[after][j])
+                    if state[after][j] == 'o':
+                        if j == 0 or state[after][j-1] != 'o':
+                            space_after_count +=1
+                    else:
+                        break        
+                print('Result: ', space_before_count + space_after_count)
+                break
+
 def show_state(state):
     print()
     state = [s+['o']*(7-len(s)) for s in state]
@@ -341,5 +382,10 @@ def show_state(state):
 # state=[['W','W',], ['W','W','W','B'], ['W', 'W','W', 'W','B'], ['W','W', 'W','W', 'W','B'], ['W','W'], ['B','B','W','W'], []] #dia second, Case start empty
 # state=[['B'], ['W'], ['B', 'W'], ['W', 'W'], ['B','B','W','W'], ['W'], []] #Special case feature 2, 1
 # state=[['B','B','W','W'], ['W'], ['B', 'W'], ['W'], [], ['W'], []] #Special case feature 2, 2
-state=[['B','B','W'], ['W','W','W'], ['B', 'W'], ['W'], [], ['W'], []] #Special case feature 2, 2 start empty
-print('score:', feature2_diagonally(state=state, chip='W'))
+# state=[['B','B','W'], ['W','W','W'], ['B', 'W'], ['W'], [], ['W'], []] #Special case feature 2, 2 start empty
+# print('score:', feature2_diagonally(state=state, chip='W'))
+
+# state=[[], [], ['B'], ['B'], [], ['W'], ['W']] #Fig 9 Left
+# state=[[], ['W', 'B'], ['B', 'B'], ['W'], ['B'], ['W'], ['B', 'W']] #Fig 9 Middle
+state=[[], ['W', 'B'], ['B', 'B'], ['W', 'W'], ['B'], ['W'], ['B', 'W']]
+print('score:', feature3_row(state=state, chip='B'))
