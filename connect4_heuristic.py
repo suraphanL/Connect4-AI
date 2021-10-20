@@ -299,12 +299,12 @@ def feature2_diagonally(state,chip):#Find 3 connected
     # if count > max_count:
     #     max_count = count
         
-def feature3_row(state,chip):#Find 3 connected
+def feature3_row(state,chip):#Find 2 connected
     state = [s+['o']*(7-len(s)) for s in state]
     show_state(state)
     target = 2
     total_score = 0
-    score = 900000
+    
     for j in range(6): #Row
         target_count = 0
         space_before_count = 0
@@ -328,6 +328,7 @@ def feature3_row(state,chip):#Find 3 connected
 
                 
             if target_count == target:
+                print('i,j',i,j)
                 print('Found target ', chip, ' count ', target_count)
                 for after in range(i+1,7):
                     print('After: ', after)
@@ -336,9 +337,13 @@ def feature3_row(state,chip):#Find 3 connected
                         if j == 0 or state[after][j-1] != 'o':
                             space_after_count +=1
                     else:
-                        break        
-                print('Result: ', space_before_count + space_after_count)
+                        break       
+                number_of_available_squares = space_before_count + space_after_count 
+                print('Result: ', number_of_available_squares)
+                total_score += feature3_score(number_of_available_squares)
                 break
+    print('total score:', total_score)
+    return total_score
 
 def show_state(state):
     print()
@@ -350,7 +355,17 @@ def show_state(state):
         print(str_out)
     print('1234567')
 
-
+def feature3_score(number_of_available_squares):
+    if number_of_available_squares >=5:
+                    return 40000
+    elif number_of_available_squares == 4:
+        return 30000
+    elif number_of_available_squares == 3:
+        return 20000
+    elif number_of_available_squares == 2:
+        return 10000               
+    else:
+        return 0
 # def is_win(state,chip):
 #     max = -1
 #     for i in range(7):
@@ -387,5 +402,6 @@ def show_state(state):
 
 # state=[[], [], ['B'], ['B'], [], ['W'], ['W']] #Fig 9 Left
 # state=[[], ['W', 'B'], ['B', 'B'], ['W'], ['B'], ['W'], ['B', 'W']] #Fig 9 Middle
-state=[[], ['W', 'B'], ['B', 'B'], ['W', 'W'], ['B'], ['W'], ['B', 'W']]
+# state=[[], ['W', 'B'], ['B', 'B'], ['W', 'W'], ['B'], ['W'], ['B', 'W']] #Fig 9 Right
+state=[[], [], ['B'], ['B'], ['W'], ['W', 'B'], ['W', 'B']] #Fig 9 Left with modification for test 2 2 connected
 print('score:', feature3_row(state=state, chip='B'))
