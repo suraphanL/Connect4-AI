@@ -345,6 +345,40 @@ def feature3_row(state,chip):#Find 2 connected
     print('total score:', total_score)
     return total_score
 
+
+
+def feature3_column(state,chip):#Find 2 connected
+    state = [s+['o']*(7-len(s)) for s in state]
+    show_state(state)
+    target = 2
+    total_score = 0
+    for i in range(6): #Row
+        count = 0
+        startIndex = -1
+        
+        for j in range(6): #Column
+            print(state[i][j] , ' chip: ', chip)
+            if state[i][j] == chip:
+                count += 1
+                if startIndex == -1:
+                    startIndex = j
+            elif count < target and state[i][j] != 'o':
+                count = 0
+                startIndex = -1
+
+            if count == target:
+                print('i,j',i,j)
+                print('Found target ', chip, ' count ', count)
+                top_adjacent = startIndex + target
+                if top_adjacent < 6 and state[i][top_adjacent] == 'o':
+                    print('immediately adjacent top square')
+                    number_of_available_squares = 6 - top_adjacent
+                    print('Result: ', number_of_available_squares)
+                    total_score += feature3_score(number_of_available_squares)
+                break
+    return total_score
+
+
 def show_state(state):
     print()
     state = [s+['o']*(7-len(s)) for s in state]
@@ -403,5 +437,12 @@ def feature3_score(number_of_available_squares):
 # state=[[], [], ['B'], ['B'], [], ['W'], ['W']] #Fig 9 Left
 # state=[[], ['W', 'B'], ['B', 'B'], ['W'], ['B'], ['W'], ['B', 'W']] #Fig 9 Middle
 # state=[[], ['W', 'B'], ['B', 'B'], ['W', 'W'], ['B'], ['W'], ['B', 'W']] #Fig 9 Right
-state=[[], [], ['B'], ['B'], ['W'], ['W', 'B'], ['W', 'B']] #Fig 9 Left with modification for test 2 2 connected
-print('score:', feature3_row(state=state, chip='B'))
+# state=[[], [], ['B'], ['B'], ['W'], ['W', 'B'], ['W', 'B']] #Fig 9 Left with modification for test 2 2 connected
+# print('score:', feature3_row(state=state, chip='B'))
+
+
+state=[[], ['B', 'B', 'W', 'B', 'B'], ['B', 'B'], ['W'], ['B'], ['W'], ['B', 'W']] #Fig 9 Middle
+print('score:', feature3_column(state=state, chip='B'))
+#case colum 2 ถ้ามีติดกันสอง แล้วตามด้วยอีกสี แล้ว ตามด้วย ติดกัน 2
+
+#
