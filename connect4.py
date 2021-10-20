@@ -1,6 +1,8 @@
 import threading
 import time
-
+import math
+from connect4_heuristic import *
+from functools import lru_cache
 debug = False
 
 def push(col,chip,state):
@@ -71,12 +73,15 @@ def check_window(state,chip,i,j):
     return (i,j,max_count)
 
 def utility(state,chip):
-    ret=is_win(state,chip)
+    # ret=is_win(state,chip)
+    new_state = tuple([ tuple( s+['o']*(7-len(s)) ) for s in state])
+    state_temp = tuple([ tuple(s) for s in state])
+    ret = score_position(new_state,state_temp, chip)
     if debug: show_state(state)
     if debug: print(ret)
     if chip == 'B':
-        return ret[2]
-    return -ret[2]
+        return ret
+    return -ret
     
 
 def is_win(state,chip):
@@ -105,13 +110,13 @@ max_depth = 12
 def min_value_function(state,a,b,level):
     # just pushed black
     if is_win(state,'B')[2] == 4:
-        return 4
+        return math.inf
     if level >= max_depth:
         if debug: print('Cutoff',state)
         ret_u = utility(state,'B')
         if debug: print('Utility',ret_u)
         return ret_u
-    v=100
+    v=math.inf
     for i in range(7):
         if len(state[i]) == 6:
             continue
@@ -120,7 +125,7 @@ def min_value_function(state,a,b,level):
         v = min(v,max_value_function(new_state,a,b,level+1))
         if v <= a:
             return v
-        if b == 10:
+        if b == math.inf:
             b = v
         else:
             b = min(b,v)
@@ -129,8 +134,8 @@ def min_value_function(state,a,b,level):
 def max_value_function(state,a,b,level):
     # just pushed white
     if is_win(state,'W')[2] == 4:
-        return -4
-    v=-100
+        return -math.inf
+    v=-math.inf
     # if black can win
     for i in range(7):
         if len(state[i]) == 6:
@@ -138,7 +143,7 @@ def max_value_function(state,a,b,level):
         new_state = tuple([list(new_col) for new_col in state])
         push(i,'B',new_state)
         if is_win(new_state,'B')[2] == 4:
-            return 4
+            return math.inf
     for i in range(7):
         if len(state[i]) == 6:
             continue
@@ -147,7 +152,7 @@ def max_value_function(state,a,b,level):
         v = max(v,min_value_function(new_state,a,b,level+1))
         if v >= b:
             return v
-        if a == -10:
+        if a == -math.inf:
             a = v
         else:
             a = max(a,v)
@@ -168,16 +173,19 @@ def alpha_beta_decision(state):
     elif s_res == 0:#ถ้าเราเป็น Turn แรก
         return 3
 
-    if s_res < 5:
-        max_depth = 4
-    elif s_res < 12:
-        max_depth = 6
-    elif s_res < 24:
-        max_depth = 8
-    else:
-        max_depth = 10
-    max_value = -100
-    a,b=-10,10
+    max_depth = 4
+    # if s_res < 5:
+    #     max_depth = 4
+    # elif s_res < 12:
+    #     max_depth = 6
+    # elif s_res < 24:
+    #     max_depth = 8
+    # else:
+    #     max_depth = 10
+
+    print('max_depth', max_depth)     
+    max_value = -math.inf
+    a,b=-math.inf,math.inf
     min_score=[]
     count_win = 0
     count_lose = 0
@@ -190,12 +198,12 @@ def alpha_beta_decision(state):
         min_score.append(ret)
         if debug: print('MiniMax Value',ret)
         if debug: show_state(new_state)
-        if ret > max_value:
+        if ret >= max_value:
             max_value=ret
             action = i
-        if ret == 4:
+        if ret == math.inf:
             count_win += 1
-        elif ret == -4:
+        elif ret == -math.inf:
             count_lose += 1
     if count_win >= 1:
         print('From my calculation, I will win')
@@ -242,3 +250,5 @@ while sum([len(c) for c in list(state)]) != 42:
             print('I win!!!')
             break
         is_white_turn = True
+
+print(score_position.cache_info())        
