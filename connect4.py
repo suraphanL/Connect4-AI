@@ -242,7 +242,7 @@ while sum([len(c) for c in list(state)]) != 42:
         terminate_flag=False
         ct.start()
         c = alpha_beta_decision(state)
-        print('select: ', c)
+        print('select: ', c+1)
         terminate_flag=True
         push(c,'B',state)
         show_state(state)
@@ -252,3 +252,4 @@ while sum([len(c) for c in list(state)]) != 42:
         is_white_turn = True
 
 print(score_position.cache_info())        
+print(feature4.cache_info()) 
