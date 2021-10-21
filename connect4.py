@@ -77,7 +77,7 @@ def utility(state,chip):
     new_state = tuple([ tuple( s+['o']*(7-len(s)) ) for s in state])
     state_temp = tuple([ tuple(s) for s in state])
     ret = score_position(new_state,state_temp, chip)
-    if debug: #show_state(state)
+    if debug: show_state(state)
     if debug: print(ret)
     if chip == 'B':
         return ret
@@ -94,7 +94,7 @@ def is_win(state,chip):
                 ans = ret
     return ans
 
-def #show_state(state):
+def show_state(state):
     print()
     state = [s+['o']*(7-len(s)) for s in state]
     for r in range(5,-1,-1):
@@ -224,7 +224,7 @@ def count_down_thread():
 is_white_turn = True
 state = ([],[],[],[],[],[],[])
 #state=[['B', 'B', 'B','W'], [], ['W', 'W','B'], ['B', 'W','B'], ['W','W'], ['W'], []]
-#show_state(state)
+show_state(state)
 while sum([len(c) for c in list(state)]) != 42:
     if is_white_turn:
         c = int(input('Please enter your column:'))
@@ -234,7 +234,7 @@ while sum([len(c) for c in list(state)]) != 42:
         push(c-1,'W',state)
         if is_win(state,'W')[2] == 4:
             print('You win!!!')
-            #show_state(state)
+            show_state(state)
             break
         is_white_turn = False
     else:
@@ -245,7 +245,7 @@ while sum([len(c) for c in list(state)]) != 42:
         print('select: ', c)
         terminate_flag=True
         push(c,'B',state)
-        #show_state(state)
+        show_state(state)
         if is_win(state,'B')[2] == 4:
             print('I win!!!')
             break
