@@ -141,7 +141,7 @@ def feature2_column(state,chip):#Find 3 connected
     #show_state(state)
     target = 3
     score = 900000
-    for i in range(6): #Row
+    for i in range(7): #Row
         count = 0
         startIndex = -1
         is_top_adjacent = False
@@ -367,7 +367,7 @@ def feature3_column(state,chip):#Find 2 connected
     #show_state(state)
     target = 2
     total_score = 0
-    for i in range(6): #Row
+    for i in range(7): #Row
         count = 0
         startIndex = -1
         

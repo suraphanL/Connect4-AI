@@ -161,27 +161,29 @@ def max_value_function(state,a,b,level):
 def alpha_beta_decision(state):
     global max_depth
     s_res = sum([len(c) for c in list(state)])
-    if s_res == 1:#ถ้าเราเป็น Turn ที่สอง
-        ind = 0
-        for c in list(state):
-            if len(c) == 1: #หา Column ที่มี chip อยู่
-                if ind == 0:#ถ้าเป็น Colum แรก return 1
-                    return 1
-                else:
-                    return ind-1
-            ind += 1
-    elif s_res == 0:#ถ้าเราเป็น Turn แรก
-        return 3
+    # if s_res == 1:#ถ้าเราเป็น Turn ที่สอง
+    #     ind = 0
+    #     for c in list(state):
+    #         if len(c) == 1: #หา Column ที่มี chip อยู่
+    #             if ind == 0:#ถ้าเป็น Colum แรก return 1
+    #                 return 1
+    #             else:
+    #                 return ind-1
+    #         ind += 1
+    # elif s_res == 0:#ถ้าเราเป็น Turn แรก
+    #     return 3
 
-    max_depth = 4
-    # if s_res < 5:
-    #     max_depth = 4
-    # elif s_res < 12:
-    #     max_depth = 6
-    # elif s_res < 24:
-    #     max_depth = 8
-    # else:
-    #     max_depth = 10
+    if s_res == 0:#ถ้าเราเป็น Turn แรก
+        return 3
+    # max_depth = 4
+    if s_res < 5:
+        max_depth = 4
+    elif s_res < 12:
+        max_depth = 6
+    elif s_res < 24:
+        max_depth = 8
+    else:
+        max_depth = 10
 
     print('max_depth', max_depth)     
     max_value = -math.inf
@@ -221,7 +223,7 @@ def count_down_thread():
       print(str(i)+'..',end='')
     print()
 
-is_white_turn = True
+is_white_turn = False #False bot เราเริ่ม
 state = ([],[],[],[],[],[],[])
 #state=[['B', 'B', 'B','W'], [], ['W', 'W','B'], ['B', 'W','B'], ['W','W'], ['W'], []]
 show_state(state)
@@ -251,5 +253,5 @@ while sum([len(c) for c in list(state)]) != 42:
             break
         is_white_turn = True
 
-print(score_position.cache_info())        
-print(feature4.cache_info()) 
+# print(score_position.cache_info())        
+# print(feature4.cache_info()) 
