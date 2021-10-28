@@ -2,16 +2,20 @@ import threading
 import time
 import math
 from connect4_heuristic import *
+from connect4_heuristic2 import *
 from functools import lru_cache
 debug = False
+columnOrder = [3,2,4,1,5,0,6]
 
 def push(col,chip,state):
     if len(state[col]) >= 6:
         return False
-    state[col].append(chip)
-
+    state[col].append(chip)    
+    # return tuple([tuple(list(state[i]).append(chip)) if i == col else state[i] for i in range(7)])
+    # return [tuple(list(state[i]) + [chip])  if i == col else state[i] for i in range(7)]
+@lru_cache(maxsize=5000)
 def check_window(state,chip,i,j):
-    state = [s+['o']*(7-len(s)) for s in state]
+    state = [list(s)+['o']*(7-len(s)) for s in state]
     # print(state)
     max_count = 0
     count = 0
@@ -72,22 +76,26 @@ def check_window(state,chip,i,j):
     #    return (i,j,3)
     return (i,j,max_count)
 
+@lru_cache(maxsize=5000)
 def utility(state,chip):
     # ret=is_win(state,chip)
-    new_state = tuple([ tuple( s+['o']*(7-len(s)) ) for s in state])
-    state_temp = tuple([ tuple(s) for s in state])
-    ret = score_position(new_state,state_temp, chip)
+    
+    new_state = full_state_tuple(state)#tuple([ tuple( s+['o']*(7-len(s)) ) for s in state])
+    # state_temp = tuple([ tuple(s) for s in state])
+    ret = score_position(new_state, chip)
+    # ret = heuristic2_score(state_temp,chip)
     if debug: show_state(state)
     if debug: print(ret)
     if chip == 'B':
         return ret
     return -ret
     
-
+@lru_cache(maxsize=5000)
 def is_win(state,chip):
     max = -1
+    ans = [0,0,0]
     for i in range(7):
-        for j in range(6):
+        for j in range(len(state[i])):
             ret=check_window(state,chip,i,j)
             if ret[2] > max:
                 max = ret[2]
@@ -96,7 +104,7 @@ def is_win(state,chip):
 
 def show_state(state):
     print()
-    state = [s+['o']*(7-len(s)) for s in state]
+    state = [list(s)+['o']*(7-len(s)) for s in state]
     for r in range(5,-1,-1):
         str_out = ''
         for c in range(7):
@@ -107,6 +115,7 @@ def show_state(state):
 
 max_depth = 12
 
+@lru_cache(maxsize=5000)
 def min_value_function(state,a,b,level):
     # just pushed black
     if is_win(state,'B')[2] == 4:
@@ -117,12 +126,13 @@ def min_value_function(state,a,b,level):
         if debug: print('Utility',ret_u)
         return ret_u
     v=math.inf
-    for i in range(7):
+    for i in columnOrder:
         if len(state[i]) == 6:
             continue
         new_state = tuple([list(new_col) for new_col in state])
         push(i,'W',new_state)
-        v = min(v,max_value_function(new_state,a,b,level+1))
+        new_tuple = to_tuple(new_state)
+        v = min(v,max_value_function(new_tuple,a,b,level+1))
         if v <= a:
             return v
         if b == math.inf:
@@ -131,25 +141,28 @@ def min_value_function(state,a,b,level):
             b = min(b,v)
     return v
 
+@lru_cache(maxsize=5000)
 def max_value_function(state,a,b,level):
     # just pushed white
     if is_win(state,'W')[2] == 4:
         return -math.inf
     v=-math.inf
     # if black can win
-    for i in range(7):
+    for i in columnOrder:
         if len(state[i]) == 6:
             continue
         new_state = tuple([list(new_col) for new_col in state])
         push(i,'B',new_state)
-        if is_win(new_state,'B')[2] == 4:
+        new_tuple = to_tuple(new_state)
+        if is_win(new_tuple,'B')[2] == 4:
             return math.inf
-    for i in range(7):
+    for i in columnOrder:
         if len(state[i]) == 6:
             continue
         new_state = tuple([list(new_col) for new_col in state])
         push(i,'B',new_state)
-        v = max(v,min_value_function(new_state,a,b,level+1))
+        new_tuple = to_tuple(new_state)
+        v = max(v,min_value_function(new_tuple,a,b,level+1))
         if v >= b:
             return v
         if a == -math.inf:
@@ -158,6 +171,7 @@ def max_value_function(state,a,b,level):
             a = max(a,v)
     return v
 
+@lru_cache(maxsize=5000)
 def alpha_beta_decision(state):
     global max_depth
     s_res = sum([len(c) for c in list(state)])
@@ -181,9 +195,9 @@ def alpha_beta_decision(state):
     elif s_res < 12:
         max_depth = 6
     elif s_res < 24:
-        max_depth = 8
+        max_depth = 6
     else:
-        max_depth = 10
+        max_depth = 8
 
     print('max_depth', max_depth)     
     max_value = -math.inf
@@ -191,12 +205,13 @@ def alpha_beta_decision(state):
     min_score=[]
     count_win = 0
     count_lose = 0
-    for i in range(7):
+    for i in columnOrder:
         if len(state[i]) == 6:
             continue
         new_state = tuple([list(new_col) for new_col in state])
         push(i,'B',new_state)
-        ret=min_value_function(new_state,a,b,0)
+        new_tuple = to_tuple(new_state)
+        ret=min_value_function(new_tuple,a,b,0)
         min_score.append(ret)
         if debug: print('MiniMax Value',ret)
         if debug: show_state(new_state)
@@ -212,6 +227,10 @@ def alpha_beta_decision(state):
     elif count_lose == 7:
         print('From my calculation, you will win')
     print(min_score,action)
+    if -math.inf not in min_score and len(state[3]) < 5:
+        print('Fix return 3')
+        return 3
+    
     return action
 
 def count_down_thread():
@@ -223,8 +242,15 @@ def count_down_thread():
       print(str(i)+'..',end='')
     print()
 
+def to_tuple(state):
+    return tuple([ tuple(s) for s in state])
+
+def full_state_tuple(state):
+    return tuple([ tuple( list(s)+['o']*(7-len(s)) ) for s in state])
+
 is_white_turn = False #False bot เราเริ่ม
 state = ([],[],[],[],[],[],[])
+# state = ((),(),(),(),(),(),(),)
 #state=[['B', 'B', 'B','W'], [], ['W', 'W','B'], ['B', 'W','B'], ['W','W'], ['W'], []]
 show_state(state)
 while sum([len(c) for c in list(state)]) != 42:
@@ -234,24 +260,28 @@ while sum([len(c) for c in list(state)]) != 42:
             print('You cannot put in column',c)
             c = int(input('Please enter your column:'))
         push(c-1,'W',state)
-        if is_win(state,'W')[2] == 4:
+        new_state = to_tuple(state)
+        if is_win(new_state,'W')[2] == 4:
             print('You win!!!')
-            show_state(state)
+            show_state(new_state)
             break
         is_white_turn = False
     else:
         ct=threading.Thread(target=count_down_thread)
         terminate_flag=False
         ct.start()
-        c = alpha_beta_decision(state)
+        new_state = to_tuple(state)
+        c = alpha_beta_decision(new_state)
         print('select: ', c+1)
         terminate_flag=True
         push(c,'B',state)
-        show_state(state)
-        if is_win(state,'B')[2] == 4:
+        new_state = to_tuple(state)
+        show_state(new_state)
+        if is_win(new_state,'B')[2] == 4:
             print('I win!!!')
             break
         is_white_turn = True
 
-# print(score_position.cache_info())        
-# print(feature4.cache_info()) 
+print(score_position.cache_info())        
+print(feature4.cache_info()) 
+# print(heuristic2_score.cache_info()) 

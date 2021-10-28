@@ -569,7 +569,7 @@ def is_win(state,chip):
 
 
 @lru_cache
-def score_position(new_state, state_temp, chip):
+def score_position(new_state, chip):
     # print('score_position')
     # return feature4(state=state, chip=chip)
     
@@ -593,7 +593,7 @@ def score_position(new_state, state_temp, chip):
                 feature3_column_score = feature3_column(state=new_state, chip= chip)
                 feature3_row_score = feature3_row(state=new_state,chip=chip)
                 feature3_diagonally_score = feature3_diagonally(state=new_state,chip=chip)
-                feature4_score = feature4(state=state_temp, chip=chip)
+                feature4_score = feature4(state=new_state, chip=chip)
                 total_score = feature_2_row_score + feature2_diagonally_score + feature_2_column_score + feature3_column_score + feature3_row_score + feature3_diagonally_score + feature4_score
                 return total_score
 
