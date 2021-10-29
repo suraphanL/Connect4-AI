@@ -1,71 +1,7 @@
 import math
 from functools import lru_cache
 
-@lru_cache
-def check_window(state,chip,i,j):
-    #state = [s+['o']*(7-len(s)) for s in state]
-    # #print(state)
-    max_count = 0
-    count = 0
-    if i <= 3:
-        count = 0
-        for col in range(4):
-            if state[i+col][j] == chip:
-                count += 1
-            elif state[i+col][j] != 'o':
-                count = 0
-                break
-        if count == 4:
-            return (i,j,4)
-    if count > max_count:
-        max_count = count
-    if j >= 3:
-        count = 0
-        for row in range(4):
-            if state[i][j-row] == chip:
-                count += 1
-            elif state[i][j-row] != 'o':
-                count = 0
-                break
-        if count == 4:
-            return (i,j,4)
-    if count > max_count:
-        max_count = count
-
-    if i <= 3 and j >= 3:
-        count = 0
-        for k in range(4):
-            if state[i+k][j-k] == chip:
-                count += 1
-            elif state[i+k][j-k] != 'o':
-                count = 0
-                break
-        if count == 4:
-            return (i,j,4)
-    if count > max_count:
-        max_count = count
-    
-    if i <= 3 and j <= 2:
-        count = 0
-        for k in range(4):
-            if state[i+k][j+k] == chip:
-                count += 1
-            elif state[i+k][j+k] != 'o':
-                count = 0
-                break
-        if count == 4:
-            return (i,j,4)
-    if count > max_count:
-        max_count = count
-        
-    # if max_count == 3 and (j == 0 or state[i][j-1] != 'o') and state[i][j] == 'o':
-    #    return (i,j,3)
-    # if max_count == 3 and state[i][j-1] == 'o':
-    #    return (i,j,3)
-    return (i,j,max_count)
-
-
-@lru_cache
+@lru_cache(maxsize=2048)
 def feature2_row(state,chip):#Find 3 connected
     # state = [s+['o']*(7-len(s)) for s in state]
     #show_state(state)
@@ -135,7 +71,7 @@ def feature2_row(state,chip):#Find 3 connected
                 return is_left_adjacent * score + is_right_adjacent * score + is_one_adjacent_always * score 
     return 0
 
-@lru_cache
+@lru_cache(maxsize=2048)
 def feature2_column(state,chip):#Find 3 connected
     #state = [s+['o']*(7-len(s)) for s in state]
     #show_state(state)
@@ -170,7 +106,7 @@ def feature2_column(state,chip):#Find 3 connected
             return is_top_adjacent * score
     return 0
 
-@lru_cache
+@lru_cache(maxsize=2048)
 def feature2_diagonally(state,chip):#Find 3 connected
     #state = [s+['o']*(7-len(s)) for s in state]
     #show_state(state)
@@ -313,7 +249,7 @@ def feature2_diagonally(state,chip):#Find 3 connected
     # if count > max_count:
     #     max_count = count
 
-@lru_cache        
+@lru_cache(maxsize=2048)        
 def feature3_row(state,chip):#Find 2 connected
     #state = [s+['o']*(7-len(s)) for s in state]
     #show_state(state)
@@ -361,7 +297,7 @@ def feature3_row(state,chip):#Find 2 connected
     return total_score
 
 
-@lru_cache
+@lru_cache(maxsize=2048)
 def feature3_column(state,chip):#Find 2 connected
     #state = [s+['o']*(7-len(s)) for s in state]
     #show_state(state)
@@ -393,7 +329,7 @@ def feature3_column(state,chip):#Find 2 connected
                 break
     return total_score
 
-@lru_cache
+@lru_cache(maxsize=2048)
 def feature3_diagonally(state,chip):#Find 2 connected
     # state = [s+['o']*(7-len(s)) for s in state]
     #show_state(state)
@@ -468,7 +404,7 @@ def feature3_diagonally(state,chip):#Find 2 connected
                     total_score += feature3_score(number_of_available_squares)
     return total_score
     
-@lru_cache
+@lru_cache(maxsize=2048)
 def feature4(state,chip):
     score_column = [40,70,120,200,120,70,40]
     total_score = 0
@@ -491,7 +427,7 @@ def show_state(state):
         # print(str_out)
     # print('1234567')
 
-@lru_cache
+@lru_cache(maxsize=2048)
 def feature3_score(number_of_available_squares):
     if number_of_available_squares >=5:
         return 40000
@@ -504,23 +440,6 @@ def feature3_score(number_of_available_squares):
     else:
         return 0
 
-
-# def is_win(state,chip):
-#     max = -1
-#     for i in range(7):
-#         for j in range(6):
-#             # ret=feature2(state,chip,i,j)
-
-@lru_cache
-def is_win(state,chip):
-    max = -1
-    for i in range(7):
-        for j in range(6):
-            ret=check_window(state,chip,i,j)
-            if ret[2] > max:
-                max = ret[2]
-                ans = ret
-    return ans
 
 # state = ([],[],[],[],[],[],[])
 # state=[['B', 'B', 'B','W'], [], ['W', 'W','B'], ['B', 'W','B'], ['W','W'], ['W'], []]
@@ -567,35 +486,42 @@ def is_win(state,chip):
 # state= [['B', 'B','B'], ['B', 'B'], ['B', 'W'], ['W'], [], [], []]
 # print(feature3_diagonally(state=state, chip='W'))
 
+# Y = W
+# R = B
+# state= [['W', 'B','W','B','W'], ['W', 'W','B','B','W','B'], ['B'], ['B','W','B','W','B','B'], ['W','B','B','B','W'], ['B','B','W'], ['W','W','W','B','W','W']]
+# def full_state_tuple(state):
+#     return tuple([ tuple( list(s)+['o']*(7-len(s)) ) for s in state])
+# new_state = full_state_tuple(state=state)    
+# print('score:', feature2_diagonally(state=new_state, chip='B'))
 
-@lru_cache
+@lru_cache(maxsize=2048)
 def score_position(new_state, chip):
     # print('score_position')
     # return feature4(state=state, chip=chip)
     
-    ret=is_win(new_state,chip)
-    if ret[2] == 4:
-        if chip == 'B':
-            return math.inf
-        else:
-             return -math.inf
+    # ret=is_win(new_state,chip)
+    # if ret[2] == 4:
+    #     if chip == 'B':
+    #         return math.inf
+    #     else:
+    #          return -math.inf
+    # else:
+    feature_2_row_score = feature2_row(state=new_state,chip=chip)
+    if feature_2_row_score == math.inf:
+        return math.inf
     else:
-        feature_2_row_score = feature2_row(state=new_state,chip=chip)
-        if feature_2_row_score == math.inf:
+        feature2_diagonally_score = feature2_diagonally(state=new_state,chip=chip)
+        if feature2_diagonally_score == math.inf:
             return math.inf
         else:
-            feature2_diagonally_score = feature2_diagonally(state=new_state,chip=chip)
-            if feature2_diagonally_score == math.inf:
-                return math.inf
-            else:
-                feature_2_column_score = feature2_column(state=new_state,chip=chip)
+            feature_2_column_score = feature2_column(state=new_state,chip=chip)
 
-                feature3_column_score = feature3_column(state=new_state, chip= chip)
-                feature3_row_score = feature3_row(state=new_state,chip=chip)
-                feature3_diagonally_score = feature3_diagonally(state=new_state,chip=chip)
-                feature4_score = feature4(state=new_state, chip=chip)
-                total_score = feature_2_row_score + feature2_diagonally_score + feature_2_column_score + feature3_column_score + feature3_row_score + feature3_diagonally_score + feature4_score
-                return total_score
+            feature3_column_score = feature3_column(state=new_state, chip= chip)
+            feature3_row_score = feature3_row(state=new_state,chip=chip)
+            feature3_diagonally_score = feature3_diagonally(state=new_state,chip=chip)
+            feature4_score = feature4(state=new_state, chip=chip)
+            total_score = feature_2_row_score + feature2_diagonally_score + feature_2_column_score + feature3_column_score + feature3_row_score + feature3_diagonally_score + feature4_score
+            return total_score
 
 # score_position(state=state, chip='B')                
 

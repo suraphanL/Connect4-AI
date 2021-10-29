@@ -11,9 +11,8 @@ def push(col,chip,state):
     if len(state[col]) >= 6:
         return False
     state[col].append(chip)    
-    # return tuple([tuple(list(state[i]).append(chip)) if i == col else state[i] for i in range(7)])
-    # return [tuple(list(state[i]) + [chip])  if i == col else state[i] for i in range(7)]
-@lru_cache(maxsize=5000)
+    
+@lru_cache(maxsize=2048)
 def check_window(state,chip,i,j):
     state = [list(s)+['o']*(7-len(s)) for s in state]
     # print(state)
@@ -76,7 +75,7 @@ def check_window(state,chip,i,j):
     #    return (i,j,3)
     return (i,j,max_count)
 
-@lru_cache(maxsize=5000)
+@lru_cache(maxsize=2048)
 def utility(state,chip):
     # ret=is_win(state,chip)
     
@@ -90,7 +89,7 @@ def utility(state,chip):
         return ret
     return -ret
     
-@lru_cache(maxsize=5000)
+@lru_cache(maxsize=2048)
 def is_win(state,chip):
     max = -1
     ans = [0,0,0]
@@ -115,7 +114,7 @@ def show_state(state):
 
 max_depth = 12
 
-@lru_cache(maxsize=5000)
+@lru_cache(maxsize=2048)
 def min_value_function(state,a,b,level):
     # just pushed black
     if is_win(state,'B')[2] == 4:
@@ -141,7 +140,7 @@ def min_value_function(state,a,b,level):
             b = min(b,v)
     return v
 
-@lru_cache(maxsize=5000)
+@lru_cache(maxsize=2048)
 def max_value_function(state,a,b,level):
     # just pushed white
     if is_win(state,'W')[2] == 4:
@@ -171,7 +170,7 @@ def max_value_function(state,a,b,level):
             a = max(a,v)
     return v
 
-@lru_cache(maxsize=5000)
+# @lru_cache(maxsize=2048) 
 def alpha_beta_decision(state):
     global max_depth
     s_res = sum([len(c) for c in list(state)])
@@ -189,7 +188,7 @@ def alpha_beta_decision(state):
 
     if s_res == 0:#ถ้าเราเป็น Turn แรก
         return 3
-    # max_depth = 4
+    
     if s_res < 5:
         max_depth = 4
     elif s_res < 12:
@@ -198,6 +197,10 @@ def alpha_beta_decision(state):
         max_depth = 6
     else:
         max_depth = 8
+
+    # We will play 3 mindle
+    if len(state[3]) < 6:
+        max_depth = 4
 
     print('max_depth', max_depth)     
     max_value = -math.inf
@@ -212,7 +215,7 @@ def alpha_beta_decision(state):
         push(i,'B',new_state)
         new_tuple = to_tuple(new_state)
         ret=min_value_function(new_tuple,a,b,0)
-        min_score.append(ret)
+        min_score.append((ret,i))
         if debug: print('MiniMax Value',ret)
         if debug: show_state(new_state)
         if ret >= max_value:
@@ -227,9 +230,18 @@ def alpha_beta_decision(state):
     elif count_lose == 7:
         print('From my calculation, you will win')
     print(min_score,action)
-    if -math.inf not in min_score and len(state[3]) < 5:
+    if len(state[3]) < 6:
+        for score in min_score:
+            if score[0] == -math.inf:
+                return action
         print('Fix return 3')
-        return 3
+        return 3         
+    else:
+        # return action
+        return get_best_ans(min_scores=min_score,max_score=max_value)    
+    # if -math.inf not in min_score and len(state[3]) < 6:
+    #     print('Fix return 3')
+    #     return 3
     
     return action
 
@@ -248,7 +260,16 @@ def to_tuple(state):
 def full_state_tuple(state):
     return tuple([ tuple( list(s)+['o']*(7-len(s)) ) for s in state])
 
-is_white_turn = False #False bot เราเริ่ม
+
+def get_best_ans(min_scores, max_score):
+    filtered = tuple(filter(lambda score: score[0] == max_score, min_scores))
+    for order in columnOrder:
+        for max in filtered:
+            col = max[1]
+            if col == order:
+                return col
+
+is_white_turn = True #False bot เราเริ่ม
 state = ([],[],[],[],[],[],[])
 # state = ((),(),(),(),(),(),(),)
 #state=[['B', 'B', 'B','W'], [], ['W', 'W','B'], ['B', 'W','B'], ['W','W'], ['W'], []]
@@ -282,6 +303,15 @@ while sum([len(c) for c in list(state)]) != 42:
             break
         is_white_turn = True
 
-print(score_position.cache_info())        
-print(feature4.cache_info()) 
-# print(heuristic2_score.cache_info()) 
+print(feature2_column.cache_info())        
+print(feature2_row.cache_info()) 
+print(feature2_diagonally.cache_info()) 
+print(feature3_column.cache_info()) 
+print(feature3_row.cache_info()) 
+print(feature3_diagonally.cache_info()) 
+print(feature4.cache_info())
+
+print(is_win.cache_info())
+print(check_window.cache_info())
+
+# print(alpha_beta_decision.cache_info()) #not hit
